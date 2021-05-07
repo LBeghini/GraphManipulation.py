@@ -78,11 +78,10 @@ class Graph(pg.GraphItem):
 class Window(QMainWindow):
     def __init__(self):
         super(Window, self).__init__()
-        gnx= nx.from_graph6_bytes("L??????????^~@".encode('utf-8'))
-        h = nx.drawing.layout.random_layout(gnx) # TODO: transform this to array and convert to decimal
-        nx_edges = gnx.edges(data=True) # TODO: transform this to array
-
         self.g = Graph()
+        self.pos = None
+        self.adj = None
+        self.transform_g6_in_graph("M????CCA?_CB_SOI?")
         self.define_graph()
 
         self.w = pg.GraphicsLayoutWidget(show=True)
@@ -92,30 +91,48 @@ class Window(QMainWindow):
 
         self.setCentralWidget(self.w)
 
+    def transform_g6_in_graph(self, g6):
+        gnx = nx.from_graph6_bytes(g6.encode('utf-8'))
+        points = nx.drawing.layout.shell_layout(gnx)  # TODO: transform this to array and convert to decimal
+        nx_edges = gnx.edges(data=True)
+
+        obj_edge = []
+        obj_pos = []
+
+        for e in nx_edges:
+            aux = [e[0], e[1]]
+            if not reversed(aux) in obj_edge:
+                obj_edge.append(aux)
+
+        self.adj = np.array(obj_edge)
+
+        for point in points.values():
+            aux = [point[0] * 10 // 1, point[1] * 10 // 1]
+            obj_pos.append(aux)
+
+        self.pos = np.array(obj_pos, dtype=float)
+
     def define_graph(self):
 
-        # Define positions of nodes
-        pos = np.array([
-            [0, 0],
-            [10, 0],
-            [0, 10],
-            [10, 10],
-            [5, 5],
-            [15, 5]
-        ], dtype=float)
-
-        # Define the set of connections in the graph
-        adj = np.array([
-            [0, 1],
-            [1, 3],
-            [3, 2],
-            [2, 0],
-            [1, 5],
-            [3, 5],
-        ])
-
-        adj[0].reverse()
-        pass
+        # # Define positions of nodes
+        # pos = np.array([
+        #     [0, 0],
+        #     [10, 0],
+        #     [0, 10],
+        #     [10, 10],
+        #     [5, 5],
+        #     [15, 5]
+        # ], dtype=float)
+        #
+        # # Define the set of connections in the graph
+        # adj = np.array([
+        #     [0, 1],
+        #     [1, 3],
+        #     [3, 2],
+        #     [2, 0],
+        #     [1, 5],
+        #     [3, 5],
+        # ])
 
 
         # # Define the symbol to use for each node (this is optional)
@@ -132,11 +149,11 @@ class Window(QMainWindow):
         # ], dtype=[('red', np.ubyte), ('green', np.ubyte), ('blue', np.ubyte), ('alpha', np.ubyte), ('width', float)])
 
         # Define text to show next to each symbol
-        texts = ["Point %d" % i for i in range(6)]
+        texts = ["%d" % i for i in range(len(self.pos))]
 
         # Update the graph
         # self.g.setData(pos=pos, adj=adj, pen=lines, size=1, symbol=symbols, pxMode=False, text=texts)
-        self.g.setData(pos=pos, adj=adj, size=1, pxMode=False, text=texts)
+        self.g.setData(pos=self.pos, adj=self.adj, size=1, pxMode=False, text=texts)
 
 
 if __name__ == '__main__':
