@@ -1,5 +1,6 @@
 import sys
 import pyqtgraph as pg
+from pyqtgraph import ScatterPlotItem
 from pyqtgraph.Qt import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMainWindow, QApplication
 import numpy as np
@@ -10,6 +11,8 @@ pg.setConfigOptions(antialias=True)
 
 
 class Graph(pg.GraphItem):
+    remove_signal = QtCore.pyqtSignal(int, list)
+
     def __init__(self):
         self.dragPoint = None
         self.dragOffset = None
@@ -71,18 +74,28 @@ class Graph(pg.GraphItem):
         self.updateGraph()
         ev.accept()
 
-    def clicked(self, pts):
-        print("clicked: %s" % pts)
+    # def mousePressEvent(self, ev):
+    #     pos = ev.buttonDownPos(QtCore.Qt.LeftButton)
+    #     print(pos)
+
+    def clicked(self, pts: ScatterPlotItem, ev):
+        print("clicked: %s" % pts.data['x'])
+        id_pos = ev[0]._index
+        id_edge = []
+        for i, edge in enumerate(self.data['adj']):
+            if id_pos in edge:
+                id_edge.append(i)
+        self.remove_signal.emit(id_pos, id_edge)
 
 
 class Window(QMainWindow):
     def __init__(self):
         super(Window, self).__init__()
-        self.g = Graph()
         self.pos = None
         self.adj = None
         self.transform_g6_in_graph("M????CCA?_CB_SOI?")
-        self.define_graph()
+
+        self._update_graph()
 
         self.w = pg.GraphicsLayoutWidget(show=True)
         self.v = self.w.addViewBox()
@@ -90,6 +103,28 @@ class Window(QMainWindow):
         self.v.addItem(self.g)
 
         self.setCentralWidget(self.w)
+
+    def _update_graph(self):
+        self.g = None
+        self.g = Graph()
+        self.define_graph()
+        self.g.remove_signal.connect(self.remove)
+
+    def remove(self, id_pos, id_edge):
+        self.v.removeItem(self.g)
+
+        pos = np.copy(self.pos)
+        adj = np.copy(self.adj)
+
+        self.pos = None
+        self.adj = None
+
+        self.adj = np.delete(adj, id_edge, axis=0)
+
+        self.pos = np.delete(pos, id_pos, axis=0)
+
+        self._update_graph()
+        self.v.addItem(self.g)
 
     def transform_g6_in_graph(self, g6):
         gnx = nx.from_graph6_bytes(g6.encode('utf-8'))
