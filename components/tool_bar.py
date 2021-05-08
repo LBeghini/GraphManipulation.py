@@ -22,7 +22,7 @@ class ToolBar(QToolBar):
         self.layout().setContentsMargins(15, 10, 20, 20)
         self.setMovable(True)
 
-        self.add_node.setDisabled(True)
+        self.add_node.setDisabled(False)
         self.add_edge.setDisabled(True)
         self.remove_node.setDisabled(False)
         self.remove_edge.setDisabled(True)

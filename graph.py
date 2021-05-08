@@ -14,6 +14,7 @@ class Graph(pg.GraphItem):
         self.dragPoint = None
         self.dragOffset = None
         self.textItems = []
+        self.click_under_cursor = False
         pg.GraphItem.__init__(self)
         self.scatter.sigClicked.connect(self.clicked)
 
@@ -72,12 +73,9 @@ class Graph(pg.GraphItem):
         self.updateGraph()
         ev.accept()
 
-    # def mousePressEvent(self, ev):
-    #     pos = ev.buttonDownPos(QtCore.Qt.LeftButton)
-    #     print(pos)
-
     def clicked(self, pts: ScatterPlotItem, ev):
         # print("clicked: %s" % pts.data['x'])
+        self.click_under_cursor = True
         id_pos = ev[0]._index
         id_edge = []
         for i, edge in enumerate(self.data['adj']):

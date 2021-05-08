@@ -96,6 +96,13 @@ class Window(QMainWindow):
 
         self.graph.setData(pos=pos, adj=adj, size=1, pxMode=False, text=texts)
 
+    def mousePressEvent(self, ev):
+        if self.toolbar.add_node.isChecked():
+            x = ev.pos().x()
+            y = ev.pos().y()
+            self.pos.append([x, -y])
+            self.define_graph()
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
