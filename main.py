@@ -1,9 +1,10 @@
 import sys
-from PyQt5.QtWidgets import QMainWindow, QApplication
+from PyQt5.QtWidgets import *
 import numpy as np
 import networkx as nx
 from graph import Graph
 import pyqtgraph as pg
+from components.tool_bar import ToolBar
 
 
 class Window(QMainWindow):
@@ -12,6 +13,8 @@ class Window(QMainWindow):
         self.pos = []
         self.adj = []
         self.texts = []
+
+        self.toolbar = ToolBar()
 
         self.graph = Graph()
 
@@ -33,6 +36,8 @@ class Window(QMainWindow):
             self.pos[i][1] = pos[i][1]
 
     def set_up(self):
+        self.addToolBar(self.toolbar)
+
         self.v.setAspectLocked()
         self.v.addItem(self.graph)
 
@@ -43,18 +48,19 @@ class Window(QMainWindow):
         self.get_adj()
         self.define_graph()
 
-    def remove(self, id_pos, id_edge):
-        if len(self.pos) == 1:
-            return
-        self.pos.pop(id_pos)
-        for i in reversed(id_edge):
-            self.adj.pop(i)
-        self.nx_graph.remove_node(self.texts[id_pos])
-        self.texts.pop(id_pos)
-        self.update_graph_index(id_pos)
-        print(self.texts)
-        print(id_pos)
-        self.define_graph()
+    def remove(self, id_pos=None, id_edge=None):
+        if self.toolbar.remove_node.isChecked():
+            if len(self.pos) == 1:
+                return
+            self.pos.pop(id_pos)
+            for i in reversed(id_edge):
+                self.adj.pop(i)
+            self.nx_graph.remove_node(self.texts[id_pos])
+            self.texts.pop(id_pos)
+            self.update_graph_index(id_pos)
+            print(self.texts)
+            print(id_pos)
+            self.define_graph()
 
     def update_graph_index(self, id_pos):
         for i in range(0, len(self.adj)):
