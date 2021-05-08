@@ -8,6 +8,7 @@ pg.setConfigOptions(antialias=True)
 
 class Graph(pg.GraphItem):
     remove_signal = QtCore.pyqtSignal(int, list)
+    change_position_signal = QtCore.pyqtSignal(np.ndarray)
 
     def __init__(self):
         self.dragPoint = None
@@ -67,6 +68,7 @@ class Graph(pg.GraphItem):
 
         ind = self.dragPoint.data()[0]
         self.data['pos'][ind] = ev.pos() + self.dragOffset
+        self.change_position_signal.emit(self.data['pos'])
         self.updateGraph()
         ev.accept()
 

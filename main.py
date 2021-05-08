@@ -25,6 +25,12 @@ class Window(QMainWindow):
 
     def connect_events(self):
         self.graph.remove_signal.connect(self.remove)
+        self.graph.change_position_signal.connect(self.update_pos)
+
+    def update_pos(self, pos):
+        for i in range(len(pos)):
+            self.pos[i][0] = pos[i][0]
+            self.pos[i][1] = pos[i][1]
 
     def set_up(self):
         self.v.setAspectLocked()
