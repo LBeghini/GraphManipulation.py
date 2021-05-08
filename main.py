@@ -43,8 +43,11 @@ class Window(QMainWindow):
         self.pos.pop(id_pos)
         for i in reversed(id_edge):
             self.adj.pop(i)
+        self.nx_graph.remove_node(self.texts[id_pos])
         self.texts.pop(id_pos)
         self.update_graph_index(id_pos)
+        print(self.texts)
+        print(id_pos)
         self.define_graph()
 
     def update_graph_index(self, id_pos):
