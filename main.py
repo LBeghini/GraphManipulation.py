@@ -1,194 +1,81 @@
 import sys
-import pyqtgraph as pg
-from pyqtgraph import ScatterPlotItem
-from pyqtgraph.Qt import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMainWindow, QApplication
 import numpy as np
 import networkx as nx
-
-# Enable antialiasing for prettier plots
-pg.setConfigOptions(antialias=True)
-
-
-class Graph(pg.GraphItem):
-    remove_signal = QtCore.pyqtSignal(int, list)
-
-    def __init__(self):
-        self.dragPoint = None
-        self.dragOffset = None
-        self.textItems = []
-        pg.GraphItem.__init__(self)
-        self.scatter.sigClicked.connect(self.clicked)
-
-    def setData(self, **kwds):
-        self.text = kwds.pop('text', [])
-        self.data = kwds
-        if 'pos' in self.data:
-            npts = self.data['pos'].shape[0]
-            self.data['data'] = np.empty(npts, dtype=[('index', int)])
-            self.data['data']['index'] = np.arange(npts)
-        self.setTexts(self.text)
-        self.updateGraph()
-
-    def setTexts(self, text):
-        for i in self.textItems:
-            i.scene().removeItem(i)
-        self.textItems = []
-        for t in text:
-            item = pg.TextItem(t)
-            self.textItems.append(item)
-            item.setParentItem(self)
-
-    def updateGraph(self):
-        pg.GraphItem.setData(self, **self.data)
-        for i, item in enumerate(self.textItems):
-            item.setPos(*self.data['pos'][i])
-
-    def mouseDragEvent(self, ev):
-        if ev.button() != QtCore.Qt.LeftButton:
-            ev.ignore()
-            return
-
-        if ev.isStart():
-            # We are already one step into the drag.
-            # Find the point(s) at the mouse cursor when the button was first 
-            # pressed:
-            pos = ev.buttonDownPos()
-            pts = self.scatter.pointsAt(pos)
-            if len(pts) == 0:
-                ev.ignore()
-                return
-            self.dragPoint = pts[0]
-            ind = pts[0].data()[0]
-            self.dragOffset = self.data['pos'][ind] - pos
-        elif ev.isFinish():
-            self.dragPoint = None
-            return
-        else:
-            if self.dragPoint is None:
-                ev.ignore()
-                return
-
-        ind = self.dragPoint.data()[0]
-        self.data['pos'][ind] = ev.pos() + self.dragOffset
-        self.updateGraph()
-        ev.accept()
-
-    # def mousePressEvent(self, ev):
-    #     pos = ev.buttonDownPos(QtCore.Qt.LeftButton)
-    #     print(pos)
-
-    def clicked(self, pts: ScatterPlotItem, ev):
-        print("clicked: %s" % pts.data['x'])
-        id_pos = ev[0]._index
-        id_edge = []
-        for i, edge in enumerate(self.data['adj']):
-            if id_pos in edge:
-                id_edge.append(i)
-        self.remove_signal.emit(id_pos, id_edge)
+from graph import Graph
+import pyqtgraph as pg
 
 
 class Window(QMainWindow):
     def __init__(self):
         super(Window, self).__init__()
-        self.pos = None
-        self.adj = None
-        self.transform_g6_in_graph("M????CCA?_CB_SOI?")
+        self.pos = []
+        self.adj = []
+        self.graph = Graph()
 
-        self._update_graph()
+        self.nx_graph = None
 
         self.w = pg.GraphicsLayoutWidget(show=True)
         self.v = self.w.addViewBox()
+
+        self.connect_events()
+        self.set_up()
+
+    def connect_events(self):
+        self.graph.remove_signal.connect(self.remove)
+
+    def set_up(self):
         self.v.setAspectLocked()
-        self.v.addItem(self.g)
+        self.v.addItem(self.graph)
 
         self.setCentralWidget(self.w)
 
-    def _update_graph(self):
-        self.g = None
-        self.g = Graph()
+        self.transform_g6_in_graph("M????CCA?_CB_SOI?")
+        self.get_pos()
+        self.get_adj()
         self.define_graph()
-        self.g.remove_signal.connect(self.remove)
 
     def remove(self, id_pos, id_edge):
-        self.v.removeItem(self.g)
+        if len(self.pos) == 1:
+            return
+        self.pos.pop(id_pos)
+        for i in reversed(id_edge):
+            self.adj.pop(i)
+        self.update_graph_index(id_pos)
+        self.define_graph()
 
-        pos = np.copy(self.pos)
-        adj = np.copy(self.adj)
+    def update_graph_index(self, id_pos):
+        for i in range(0, len(self.adj)):
+            if self.adj[i][0] > id_pos:
+                self.adj[i][0] -= 1
 
-        self.pos = None
-        self.adj = None
+            if self.adj[i][1] > id_pos:
+                self.adj[i][1] -= 1
+        print(self.adj)
 
-        self.adj = np.delete(adj, id_edge, axis=0)
-
-        self.pos = np.delete(pos, id_pos, axis=0)
-
-        self._update_graph()
-        self.v.addItem(self.g)
-
-    def transform_g6_in_graph(self, g6):
-        gnx = nx.from_graph6_bytes(g6.encode('utf-8'))
-        points = nx.drawing.layout.shell_layout(gnx)  # TODO: transform this to array and convert to decimal
-        nx_edges = gnx.edges(data=True)
-
-        obj_edge = []
-        obj_pos = []
-
-        for e in nx_edges:
-            aux = [e[0], e[1]]
-            if not reversed(aux) in obj_edge:
-                obj_edge.append(aux)
-
-        self.adj = np.array(obj_edge)
+    def get_pos(self):
+        points = nx.drawing.layout.shell_layout(self.nx_graph)
 
         for point in points.values():
             aux = [point[0] * 10 // 1, point[1] * 10 // 1]
-            obj_pos.append(aux)
+            self.pos.append(aux)
 
-        self.pos = np.array(obj_pos, dtype=float)
+    def get_adj(self):
+        nx_edges = self.nx_graph.edges(data=True)
+        for e in nx_edges:
+            aux = [e[0], e[1]]
+            if not reversed(aux) in self.adj:
+                self.adj.append(aux)
+
+    def transform_g6_in_graph(self, g6):
+        self.nx_graph = nx.from_graph6_bytes(g6.encode('utf-8'))
 
     def define_graph(self):
+        pos = np.array(self.pos, dtype=float)
+        adj = np.array(self.adj)
 
-        # # Define positions of nodes
-        # pos = np.array([
-        #     [0, 0],
-        #     [10, 0],
-        #     [0, 10],
-        #     [10, 10],
-        #     [5, 5],
-        #     [15, 5]
-        # ], dtype=float)
-        #
-        # # Define the set of connections in the graph
-        # adj = np.array([
-        #     [0, 1],
-        #     [1, 3],
-        #     [3, 2],
-        #     [2, 0],
-        #     [1, 5],
-        #     [3, 5],
-        # ])
-
-
-        # # Define the symbol to use for each node (this is optional)
-        # symbols = ['o', 'o', 'o', 'o', 't', '+']
-        #
-        # # Define the line style for each connection (this is optional)
-        # lines = np.array([
-        #     (255, 0, 0, 255, 1),
-        #     (255, 0, 255, 255, 2),
-        #     (255, 0, 255, 255, 3),
-        #     (255, 255, 0, 255, 2),
-        #     (255, 0, 0, 255, 1),
-        #     (255, 255, 255, 255, 4),
-        # ], dtype=[('red', np.ubyte), ('green', np.ubyte), ('blue', np.ubyte), ('alpha', np.ubyte), ('width', float)])
-
-        # Define text to show next to each symbol
         texts = ["%d" % i for i in range(len(self.pos))]
-
-        # Update the graph
-        # self.g.setData(pos=pos, adj=adj, pen=lines, size=1, symbol=symbols, pxMode=False, text=texts)
-        self.g.setData(pos=self.pos, adj=self.adj, size=1, pxMode=False, text=texts)
+        self.graph.setData(pos=pos, adj=adj, size=1, pxMode=False, text=texts)
 
 
 if __name__ == '__main__':
