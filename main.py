@@ -11,6 +11,8 @@ class Window(QMainWindow):
         super(Window, self).__init__()
         self.pos = []
         self.adj = []
+        self.texts = []
+
         self.graph = Graph()
 
         self.nx_graph = None
@@ -41,6 +43,7 @@ class Window(QMainWindow):
         self.pos.pop(id_pos)
         for i in reversed(id_edge):
             self.adj.pop(i)
+        self.texts.pop(id_pos)
         self.update_graph_index(id_pos)
         self.define_graph()
 
@@ -51,14 +54,14 @@ class Window(QMainWindow):
 
             if self.adj[i][1] > id_pos:
                 self.adj[i][1] -= 1
-        print(self.adj)
 
     def get_pos(self):
         points = nx.drawing.layout.shell_layout(self.nx_graph)
 
-        for point in points.values():
+        for i, point in enumerate(points.values()):
             aux = [point[0] * 10 // 1, point[1] * 10 // 1]
             self.pos.append(aux)
+            self.texts.append(i)
 
     def get_adj(self):
         nx_edges = self.nx_graph.edges(data=True)
@@ -74,7 +77,8 @@ class Window(QMainWindow):
         pos = np.array(self.pos, dtype=float)
         adj = np.array(self.adj)
 
-        texts = ["%d" % i for i in range(len(self.pos))]
+        texts = ["%d" % i for i in self.texts]
+
         self.graph.setData(pos=pos, adj=adj, size=1, pxMode=False, text=texts)
 
 
