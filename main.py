@@ -88,6 +88,7 @@ class Window(QMainWindow):
 
     def transform_g6_in_graph(self, g6):
         self.nx_graph = nx.from_graph6_bytes(g6.encode('utf-8'))
+        pass
 
     def define_graph(self):
         pos = np.array(self.pos, dtype=float)
@@ -100,6 +101,8 @@ class Window(QMainWindow):
     def onMouseClick(self, x, y):
         if self.toolbar.add_node.isChecked():
             self.pos.append([x, y])
+            self.nx_graph.add_node(max(self.nx_graph.nodes) + 1)
+            self.texts.append(max(self.nx_graph.nodes))
             self.define_graph()
 
 
