@@ -7,6 +7,7 @@ to implements visual modification to a [NetworkX](https://networkx.org) graph. T
 - [ ] Create node
 - [ ] Create edge
 - [ ] Remove node
+- [ ] Remove edge
 - [ ] Drag nodes
 - [ ] Zoom graph
 
