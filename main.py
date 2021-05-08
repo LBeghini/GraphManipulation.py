@@ -38,7 +38,7 @@ class Window(QMainWindow):
 
         self.setCentralWidget(self.w)
 
-        self.transform_g6_in_graph("M????CCA?_CB_SOI?")
+        self.transform_g6_in_graph("L??????????^~@")
         self.get_pos()
         self.get_adj()
         self.define_graph()
@@ -65,7 +65,7 @@ class Window(QMainWindow):
                 self.adj[i][1] -= 1
 
     def get_pos(self):
-        points = nx.drawing.layout.shell_layout(self.nx_graph)
+        points = nx.drawing.layout.spring_layout(self.nx_graph)
 
         for i, point in enumerate(points.values()):
             aux = [point[0] * 10 // 1, point[1] * 10 // 1]
