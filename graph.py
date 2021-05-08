@@ -1,5 +1,6 @@
 import pyqtgraph as pg
 from pyqtgraph import ScatterPlotItem
+from components.custom_scatter_plot_item import CustomScatterPlotItem
 from pyqtgraph.Qt import QtCore
 import numpy as np
 
@@ -9,14 +10,21 @@ pg.setConfigOptions(antialias=True)
 class Graph(pg.GraphItem):
     remove_signal = QtCore.pyqtSignal(int, list)
     change_position_signal = QtCore.pyqtSignal(np.ndarray)
+    canvas_clicked_signal = QtCore.pyqtSignal(float, float)
 
     def __init__(self):
         self.dragPoint = None
         self.dragOffset = None
         self.textItems = []
         self.click_under_cursor = False
+
         pg.GraphItem.__init__(self)
+
+        self.scatter = CustomScatterPlotItem()
+        self.scatter.setParentItem(self)
+
         self.scatter.sigClicked.connect(self.clicked)
+        self.scatter.sigClickedCanvas.connect(self.clickedCanvas)
 
     def setData(self, **kwds):
         self.text = kwds.pop('text', [])
@@ -82,3 +90,6 @@ class Graph(pg.GraphItem):
             if id_pos in edge:
                 id_edge.append(i)
         self.remove_signal.emit(id_pos, id_edge)
+
+    def clickedCanvas(self, pts: ScatterPlotItem, x, y):
+        self.canvas_clicked_signal.emit(x, y)

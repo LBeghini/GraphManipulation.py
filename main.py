@@ -29,6 +29,7 @@ class Window(QMainWindow):
     def connect_events(self):
         self.graph.remove_signal.connect(self.remove)
         self.graph.change_position_signal.connect(self.update_pos)
+        self.graph.canvas_clicked_signal.connect(self.onMouseClick)
 
     def update_pos(self, pos):
         for i in range(len(pos)):
@@ -96,11 +97,9 @@ class Window(QMainWindow):
 
         self.graph.setData(pos=pos, adj=adj, size=1, pxMode=False, text=texts)
 
-    def mousePressEvent(self, ev):
+    def onMouseClick(self, x, y):
         if self.toolbar.add_node.isChecked():
-            x = ev.pos().x()
-            y = ev.pos().y()
-            self.pos.append([x, -y])
+            self.pos.append([x, y])
             self.define_graph()
 
 

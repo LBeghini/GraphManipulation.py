@@ -12,7 +12,7 @@ class ToolBar(QToolBar):
         self.add_node = ActionButton("Add node", Icon("addNodeIcon"))
         self.add_edge = ActionButton("Add edge", Icon("connectIcon"))
         self.remove_node = ActionButton("Remove node", Icon("deleteIcon"))
-        self.remove_edge = ActionButton("Remove node", Icon("deleteIcon"))
+        self.remove_edge = ActionButton("Remove edge", Icon("deleteIcon"))
 
         self.set_content_attributes()
         self.set_up_layout()
