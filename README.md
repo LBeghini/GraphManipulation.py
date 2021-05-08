@@ -43,7 +43,7 @@ After that you should see a venv directory.
 
 To run commands using venv, go to ```Scripts``` directory inside ```venv```:
 ```
-Vogels-Approximation-Method
+GraphManipulation
 │   main.py
 │   ...
 └─── 🗀 venv
