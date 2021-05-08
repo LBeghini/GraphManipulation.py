@@ -6,10 +6,10 @@ to implements visual modification to a [NetworkX](https://networkx.org) graph. T
 ## Features
 - [ ] Create node
 - [ ] Create edge
-- [ ] Remove node
+- [x] Remove node
 - [ ] Remove edge
-- [ ] Drag nodes
-- [ ] Zoom graph
+- [x] Drag nodes
+- [x] Zoom graph
 
 > The unchecked options are yet to be completed. Take a look at the developtment of the library [here]().
 
