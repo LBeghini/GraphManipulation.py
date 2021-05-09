@@ -17,6 +17,7 @@ class Graph(pg.GraphItem):
         self.dragOffset = None
         self.textItems = []
         self.click_under_cursor = False
+        self.custom_pen = []
 
         pg.GraphItem.__init__(self)
 
@@ -33,8 +34,13 @@ class Graph(pg.GraphItem):
             npts = self.data['pos'].shape[0]
             self.data['data'] = np.empty(npts, dtype=[('index', int)])
             self.data['data']['index'] = np.arange(npts)
+            self.createPen()
         self.setTexts(self.text)
         self.updateGraph()
+
+    def createPen(self):
+        for i in range(0, len(self.data['pos'])):
+            self.custom_pen.append({"width": 1})
 
     def setTexts(self, text):
         for i in self.textItems:
@@ -85,6 +91,9 @@ class Graph(pg.GraphItem):
         # print("clicked: %s" % pts.data['x'])
         self.click_under_cursor = True
         id_pos = ev[0]._index
+        current_pen = self.custom_pen.copy()
+        current_pen[id_pos] = {"color": "#164aba", "width": 2}
+        self.scatter.setPen(current_pen)
         id_edge = []
         for i, edge in enumerate(self.data['adj']):
             if id_pos in edge:
