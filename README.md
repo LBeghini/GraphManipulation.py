@@ -1,7 +1,7 @@
 # ⬡ GraphManipulation.py
 
 This project uses an external library, [pyqtgraph](https://github.com/pyqtgraph/pyqtgraph), based on the [custom graph item example](https://github.com/pyqtgraph/pyqtgraph/blob/develop/examples/CustomGraphItem.py)
-to implements visual modification to a [NetworkX](https://networkx.org) graph. This project are based on the needs of another project developed to filter graphs based equations and conditions.
+to implements visual modification to a [NetworkX](https://networkx.org) graph. This project is based on the needs of another project developed to filter graphs based equations and conditions.
 
 ## Features
 - [x] Create node
