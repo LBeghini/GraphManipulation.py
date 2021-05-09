@@ -103,3 +103,35 @@ class Graph(pg.GraphItem):
 
     def clickedCanvas(self, pts: ScatterPlotItem, x, y):
         self.canvas_clicked_signal.emit(x, y)
+
+    # TODO: This is the method that must be adapted with LineROI
+    # def generatePicture(self):
+    #     self.picture = QtGui.QPicture()
+    #     if self.pen is None or self.pos is None or self.adjacency is None:
+    #         return
+    #
+    #     p = QtGui.QPainter(self.picture)
+    #     try:
+    #         pts = self.pos[self.adjacency]
+    #         pen = self.pen
+    #         if isinstance(pen, np.ndarray):
+    #             lastPen = None
+    #             for i in range(pts.shape[0]):
+    #                 pen = self.pen[i]
+    #                 if np.any(pen != lastPen):
+    #                     lastPen = pen
+    #                     if pen.dtype.fields is None:
+    #                         p.setPen(fn.mkPen(color=(pen[0], pen[1], pen[2], pen[3]), width=1))
+    #                     else:
+    #                         p.setPen(fn.mkPen(color=(pen['red'], pen['green'], pen['blue'], pen['alpha']),
+    #                                           width=pen['width']))
+    #                 p.drawLine(QtCore.QPointF(*pts[i][0]), QtCore.QPointF(*pts[i][1]))
+    #         else:
+    #             if pen == 'default':
+    #                 pen = getConfigOption('foreground')
+    #             p.setPen(fn.mkPen(pen))
+    #             pts = pts.reshape((pts.shape[0] * pts.shape[1], pts.shape[2]))
+    #             path = fn.arrayToQPath(x=pts[:, 0], y=pts[:, 1], connect='pairs')
+    #             p.drawPath(path)
+    #     finally:
+    #         p.end()
