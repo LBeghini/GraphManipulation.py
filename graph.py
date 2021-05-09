@@ -34,12 +34,13 @@ class Graph(pg.GraphItem):
             npts = self.data['pos'].shape[0]
             self.data['data'] = np.empty(npts, dtype=[('index', int)])
             self.data['data']['index'] = np.arange(npts)
-            self.createPen()
+            self.createPen(len(self.data['pos']))
         self.setTexts(self.text)
         self.updateGraph()
 
-    def createPen(self):
-        for i in range(0, len(self.data['pos'])):
+    def createPen(self, size):
+        self.custom_pen = []
+        for i in range(0, size):
             self.custom_pen.append({"width": 1})
 
     def setTexts(self, text):

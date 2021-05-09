@@ -62,6 +62,7 @@ class Window(QMainWindow):
             print(self.texts)
             print(id_pos)
             self.define_graph()
+            self.graph.createPen(len(self.pos))
 
     def update_graph_index(self, id_pos):
         for i in range(0, len(self.adj)):
