@@ -4,7 +4,7 @@ This project uses an external library, [pyqtgraph](https://github.com/pyqtgraph/
 to implements visual modification to a [NetworkX](https://networkx.org) graph. This project are based on the needs of another project developed to filter graphs based equations and conditions.
 
 ## Features
-- [ ] Create node
+- [x] Create node
 - [ ] Create edge
 - [x] Remove node
 - [ ] Remove edge
