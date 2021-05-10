@@ -1,7 +1,8 @@
 import pyqtgraph as pg
-from pyqtgraph import ScatterPlotItem
+from pyqtgraph import ScatterPlotItem, getConfigOption
+from pyqtgraph import functions as fn
 from components.custom_scatter_plot_item import CustomScatterPlotItem
-from pyqtgraph.Qt import QtCore
+from pyqtgraph.Qt import QtCore, QtGui
 import numpy as np
 
 pg.setConfigOptions(antialias=True)
@@ -105,33 +106,27 @@ class Graph(pg.GraphItem):
         self.canvas_clicked_signal.emit(x, y)
 
     # TODO: This is the method that must be adapted with LineROI
-    # def generatePicture(self):
-    #     self.picture = QtGui.QPicture()
-    #     if self.pen is None or self.pos is None or self.adjacency is None:
-    #         return
-    #
-    #     p = QtGui.QPainter(self.picture)
-    #     try:
-    #         pts = self.pos[self.adjacency]
-    #         pen = self.pen
-    #         if isinstance(pen, np.ndarray):
-    #             lastPen = None
-    #             for i in range(pts.shape[0]):
-    #                 pen = self.pen[i]
-    #                 if np.any(pen != lastPen):
-    #                     lastPen = pen
-    #                     if pen.dtype.fields is None:
-    #                         p.setPen(fn.mkPen(color=(pen[0], pen[1], pen[2], pen[3]), width=1))
-    #                     else:
-    #                         p.setPen(fn.mkPen(color=(pen['red'], pen['green'], pen['blue'], pen['alpha']),
-    #                                           width=pen['width']))
-    #                 p.drawLine(QtCore.QPointF(*pts[i][0]), QtCore.QPointF(*pts[i][1]))
-    #         else:
-    #             if pen == 'default':
-    #                 pen = getConfigOption('foreground')
-    #             p.setPen(fn.mkPen(pen))
-    #             pts = pts.reshape((pts.shape[0] * pts.shape[1], pts.shape[2]))
-    #             path = fn.arrayToQPath(x=pts[:, 0], y=pts[:, 1], connect='pairs')
-    #             p.drawPath(path)
-    #     finally:
-    #         p.end()
+    def generatePicture(self):
+        self.picture = QtGui.QPicture()
+        if self.pen is None or self.pos is None or self.adjacency is None:
+            return
+    
+        p = QtGui.QPainter(self.picture)
+        try:
+            pts = self.pos[self.adjacency]
+            pen = self.pen
+            if pen == 'default':
+                pen = getConfigOption('foreground')
+            p.setPen(fn.mkPen(pen))
+            #pts = pts.reshape((pts.shape[0] * pts.shape[1], pts.shape[2]))
+            for i in range(pts.shape[0]):
+                line = pg.LineSegmentROI([pts[i][0], pts[i][1]], pen=pen)
+                line.setParentItem(self)
+
+                #line.handles[0]['item'] = self.scatter.pointsAt(line.handles[0]['pos'])
+                #line.handles[1]['item'] = self.scatter.pointsAt(line.handles[1]['pos'])
+                #line.replaceHandle(line.handles, [self.scatter.pointsAt(pts[i][0]), self.scatter.pointsAt(pts[i][1])])
+            #path = fn.arrayToQPath(x=pts[:, 0], y=pts[:, 1], connect='pairs')
+            #p.drawPath(path)
+        finally:
+            p.end()
